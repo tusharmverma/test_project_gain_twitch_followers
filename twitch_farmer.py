@@ -30,6 +30,39 @@ def sign_in(username, password):
 def main():
 
 
+
+def get_page_element(input):
+    global page_elements
+
+    return page_elements[input]["value"]
+
+
+def get_full_path(file_path):
+    return str(Path("{}{}".format(os.getcwd(), file_path)))
+
+
+def find_available_proxy():
+    proxies_csv_path = get_full_path("/data/proxies.csv")
+    proxies_csv = pandas.read_csv(proxies_csv_path, sep=',', dtype="str")
+
+    # define proxies.csv columns
+    proxy_rows = proxies_csv.proxy
+    status_rows = proxies_csv.status
+
+    # go through every proxy in .csv and check if it is available to use
+    for i, (proxy, status) in enumerate(zip(proxy_rows, status_rows)):
+        if i == len(proxy_rows) - 1 and status == "USED":
+            print("--------------------------------")
+            print("No more proxies!!!")
+            print("--------------------------------")
+            exit()
+        elif pandas.isnull(status):
+            proxies_csv.at[i, 'status'] = "USED"
+            proxies_csv.to_csv(proxies_csv_path, sep=',',
+                               index=False, index_label=False)
+            return proxy
+
+
 def run_driver(run_with_proxy):
     global driver
     global current_proxy
